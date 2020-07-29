@@ -1,3 +1,6 @@
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config()
+}
 const Item = require('./models/item-model'); //export of Item model
 const express = require('express');
 const morgan = require('morgan');
@@ -9,9 +12,6 @@ const session = require('express-session');
 const bcrypt = require('bcrypt');
 const passport = require('passport');
 const app = express();
-if (process.env.NODE_ENV !== 'production') {
-    require('dotenv').config()
-  }
 
 //initialize autheticator
 const initializePassport = require('./passport-config');
@@ -27,19 +27,16 @@ const users = [];
 //temp shopping cart
 const cart = [];
 
-/*
-//initialize Stripe
+/*//initialize Stripe
 // Set your secret key. Remember to switch to your live secret key in production!
 // See your keys here: https://dashboard.stripe.com/account/apikeys
 const stripe = require('stripe')(process.env.STRIPE_API_KEY);
-
 const paymentIntent = await stripe.paymentIntents.create({
   amount: 1000,
   currency: 'usd',
   payment_method_types: ['card'],
   receipt_email: 'jenny.rosen@example.com',
-});
-*/
+});*/
 
 //Connect to mongoDB
 const dburi = process.env.DBCONN;//process.env.DBCONN
@@ -51,9 +48,6 @@ mongoose.connect(dburi, { useNewUrlParser: true, useUnifiedTopology: true})//Asy
 
 //register view engine
 app.set('view engine', 'ejs');
-    //to set folder for views
-    //app.set('views', 'my-views');
-    //app.set('views', path.join(__dirname, '/views/'));
 
 app.listen(process.env.SERVER_IP, () => {
     console.log("App is starting at port");
@@ -88,7 +82,7 @@ function checkAuthenticated(req, res, next) {
     next()
   }
   
-  
+
   /*---------------set routes---------------*/
   //login
   app.post('/login', checkNotAuthenticated, passport.authenticate('local', {
@@ -175,16 +169,7 @@ function checkAuthenticated(req, res, next) {
   
   //charge
   app.post('/charge', (req, res)=>{
-    //send through to stripe api here
-    /*
-    req.params
-    if(){//if the payment method is invalid
-        res.redirect('/payment-page/');
-    }
-    else{//payment method is valid
-        res.redirect('/payment-confirmation');
-    }
-    */
+    //send payment through to stripe api
   })
   
   /*---------------get routes---------------*/
@@ -222,6 +207,7 @@ function checkAuthenticated(req, res, next) {
   
   //catalog route
   app.get('/catalog', (req, res)=>{
+    const component_name = null;
     var user_Status;
     var user_name;
     if(req.user){
@@ -234,7 +220,7 @@ function checkAuthenticated(req, res, next) {
     }
     Item.find()
     .then((result)=>{
-        res.render('catalog-page', {catalog_entries: result, username: user_name, loggedIn: user_Status});
+        res.render('catalog-page', {catalog_entries: result, username: user_name, loggedIn: user_Status, comp_name : component_name});
     })
     .catch((err)=>{
         console.log(err);
@@ -267,7 +253,6 @@ function checkAuthenticated(req, res, next) {
   //find by Component
   app.get('/catalog/component/:id', (req,res)=>{
     const component_name = req.params.id;
-    //var marked_box = 
     var user_Status;
     var user_name;
     if(req.user){
@@ -281,7 +266,7 @@ function checkAuthenticated(req, res, next) {
     Item.find({component: component_name}).sort({createdAt: -1})
     .then((result)=>{
         //res.cookie('name', 'first_cookie'); //Sets name = express
-        res.render('catalog-page', {catalog_entries: result, username: user_name, loggedIn: user_Status});
+        res.render('catalog-page', {catalog_entries: result, username: user_name, loggedIn: user_Status, comp_name : component_name});
     })
     .catch((err)=>{
         console.log(err);
@@ -289,7 +274,7 @@ function checkAuthenticated(req, res, next) {
   });
   
   //product page
-  app.get('/item/:id', (req,res)=>{//http://localhost:3000/items/5f1a36c609e4cc5e9c3457f0 // fix URL to product/:id
+  app.get('/item/:id', (req,res)=>{
     const id = req.params.id;
     Item.findById(id)
     .then((result)=>{
