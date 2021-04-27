@@ -1,0 +1,14 @@
+<% const all_brands = ['HyperX', 'G.Skill', 'SAMSUNG', 'Corsair', 'AMD', 'Intel', 'MSI', 'ASUS', 'NZXT', 'Gigabyte', 'EVGA', 'SilverStone Technology', 
+'Sapphire Technology', 'Thermaltake'];
+for(let index = 0; index < all_brands.length; index++){ %>
+    <div class="form-check">
+        <input class="form-check-input" type="checkbox" id=<%=all_brands[index] %> onclick='window.location.assign("/catalog/brand/<%= all_brands[index]%>")' 
+        <% if(all_brands[index] === check_brand){ %>
+             checked 
+        <% } else{ %>
+             unchecked 
+        <% } %>>
+        <label class="form-check-label" for="formCheck-1"><%=all_brands[index] %></label></div>
+    <% } %>
+
+

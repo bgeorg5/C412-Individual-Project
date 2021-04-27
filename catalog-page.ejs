@@ -1,0 +1,51 @@
+<html>
+<head>
+    <%- include('./partials/head') %> 
+</head>
+<body>
+    <%- include('./partials/nav') %> 
+    <main class="page catalog-page">
+        <section class="clean-block clean-catalog dark">
+            <div class="container">
+                <div class="block-heading">
+                    <h2 class="text-info">Catalog Page</h2>
+                    <p>Build your Rig!</p>
+                </div>
+                <div class="content">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="d-none d-md-block">
+                                <div class="filters">
+                                    <div class="filter-item">
+                                        <h3>Components</h3>
+                                        <%- include('./partials/components') %>
+
+                                    </div>
+                                    <div class="filter-item">
+                                        <h3>Brands</h3>
+                                        <%- include('./partials/brands') %>
+
+                                    </div>
+                                    <div class="filter-item"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="products">
+                                <div class="row no-gutters">
+                                    <%- include('./partials/cgrid', {starternum : 0}) %>
+                                </div>
+                                <nav>
+                                    
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <%- include('./partials/footer') %> 
+</body>
+
+</html>

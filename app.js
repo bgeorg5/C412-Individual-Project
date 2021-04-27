@@ -13,61 +13,61 @@ const bcrypt = require('bcrypt');
 const passport = require('passport');
 const app = express();
 
-//initialize autheticator
-const initializePassport = require('./passport-config');
-const { Authenticator } = require('passport');
-initializePassport(
-  passport,
-  email => users.find(user => user.email === email),
-  id => users.find(user => user.id === id)
-)
+  //initialize autheticator
+  const initializePassport = require('./passport-config');
+  const { Authenticator } = require('passport');
+  initializePassport(
+    passport,
+    email => users.find(user => user.email === email),
+    id => users.find(user => user.id === id)
+  )
+  
+  //temp user accounts
+  const users = [];
+  //temp shopping cart
+  const cart = [];
+  
+  /*//initialize Stripe
+  // Set your secret key. Remember to switch to your live secret key in production!
+  // See your keys here: https://dashboard.stripe.com/account/apikeys
+  const stripe = require('stripe')(process.env.STRIPE_API_KEY);
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount: 1000,
+    currency: 'usd',
+    payment_method_types: ['card'],
+    receipt_email: 'jenny.rosen@example.com',
+  });*/
+  
+  //Connect to mongoDB
+  const dburi = process.env.DBCONN;//process.env.DBCONN
+  mongoose.connect(dburi, { useNewUrlParser: true, useUnifiedTopology: true})//Async task returning a 'promise', the 2nd param stops deprecation warnings
+      .then((result)=>{
+          //app.listen(process.env.SERVER_IP);//listen for request
+          console.log('connected to db');})
+      .catch((err)=>console.log(err));
+  
+  //register view engine
+  app.set('view engine', 'ejs');
+  
+  app.listen(process.env.SERVER_IP, () => {
+      console.log("App is starting at port");
+  }); 
 
-//temp user accounts
-const users = [];
-//temp shopping cart
-const cart = [];
+  //middleware and static files
+  app.use(express.static('public'));//(!)change to public?
+  app.use(express.urlencoded({extended: false})); //change to true??? - takes url encoded data entered from webpage (form on create page) and passes it into the req obj
+  app.use(morgan('dev'));
+  app.use(flash())
+  app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false
+  }))
+  app.use(passport.initialize())
+  app.use(passport.session()) 
 
-/*//initialize Stripe
-// Set your secret key. Remember to switch to your live secret key in production!
-// See your keys here: https://dashboard.stripe.com/account/apikeys
-const stripe = require('stripe')(process.env.STRIPE_API_KEY);
-const paymentIntent = await stripe.paymentIntents.create({
-  amount: 1000,
-  currency: 'usd',
-  payment_method_types: ['card'],
-  receipt_email: 'jenny.rosen@example.com',
-});*/
-
-//Connect to mongoDB
-const dburi = process.env.DBCONN;//process.env.DBCONN
-mongoose.connect(dburi, { useNewUrlParser: true, useUnifiedTopology: true})//Async task returning a 'promise', the 2nd param stops deprecation warnings
-    .then((result)=>{
-        //app.listen(process.env.SERVER_IP);//listen for request
-        console.log('connected to db');})
-    .catch((err)=>console.log(err));
-
-//register view engine
-app.set('view engine', 'ejs');
-
-app.listen(process.env.SERVER_IP, () => {
-    console.log("App is starting at port");
-}); 
-
-//middleware and static files
-app.use(express.static('public'));//(!)change to public?
-app.use(express.urlencoded({extended: false})); //change to true??? - takes url encoded data entered from webpage (form on create page) and passes it into the req obj
-app.use(morgan('dev'));
-app.use(flash())
-app.use(session({
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false
-}))
-app.use(passport.initialize())
-app.use(passport.session())
-
-//Authentication checks
-function checkAuthenticated(req, res, next) {
+  //Authentication checks
+  function checkAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
       return next()
     }
@@ -81,7 +81,6 @@ function checkAuthenticated(req, res, next) {
     }
     next()
   }
-  
 
   /*---------------set routes---------------*/
   //login
@@ -208,6 +207,7 @@ function checkAuthenticated(req, res, next) {
   //catalog route
   app.get('/catalog', (req, res)=>{
     const component_name = null;
+    //var brand_name = null;
     var user_Status;
     var user_name;
     if(req.user){
@@ -220,7 +220,7 @@ function checkAuthenticated(req, res, next) {
     }
     Item.find()
     .then((result)=>{
-        res.render('catalog-page', {catalog_entries: result, username: user_name, loggedIn: user_Status, comp_name : component_name});
+        res.render('catalog-page', {catalog_entries: result, username: user_name, loggedIn: user_Status, comp_name : component_name, check_component: null, check_brand: null});
     })
     .catch((err)=>{
         console.log(err);
@@ -229,7 +229,7 @@ function checkAuthenticated(req, res, next) {
   
   //find by brand
   app.get('/catalog/brand/:id', (req,res)=>{
-    const brand_name = req.params.id;
+    var brand_name = req.params.id;
     var user_Status;
     var user_name;
     if(req.user){
@@ -243,7 +243,7 @@ function checkAuthenticated(req, res, next) {
     Item.find({brand: brand_name})
     .then((result)=>{
         //console.log(result[0].title);
-        res.render('catalog-page', {catalog_entries: result, check_brand: brand_name, username: user_name, loggedIn: user_Status});
+        res.render('catalog-page', {catalog_entries: result, username: user_name, loggedIn: user_Status, check_brand: brand_name, check_component: null});
     })
     .catch((err)=>{
         console.log(err);
@@ -252,7 +252,7 @@ function checkAuthenticated(req, res, next) {
   
   //find by Component
   app.get('/catalog/component/:id', (req,res)=>{
-    const component_name = req.params.id;
+    var component_name = req.params.id;
     var user_Status;
     var user_name;
     if(req.user){
@@ -266,7 +266,7 @@ function checkAuthenticated(req, res, next) {
     Item.find({component: component_name}).sort({createdAt: -1})
     .then((result)=>{
         //res.cookie('name', 'first_cookie'); //Sets name = express
-        res.render('catalog-page', {catalog_entries: result, username: user_name, loggedIn: user_Status, comp_name : component_name});
+        res.render('catalog-page', {catalog_entries: result, username: user_name, loggedIn: user_Status, comp_name : component_name, check_component: component_name, check_brand: null});
     })
     .catch((err)=>{
         console.log(err);

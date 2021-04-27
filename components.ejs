@@ -1,0 +1,13 @@
+<% const all_components = ['CPU Processors', 'Memory', 'Graphics cards', 'Motherboards', 'Power supply', 'Cases', 'Internal Hard Drives', 'Solid State Drives', 'Heatsinks', 'CPU Cooling', 'Water Cooling Systems', 
+'Case Fans'];
+for(let index = 0; index < all_components.length; index++){ %>
+    <div class="form-check">
+        <input class="form-check-input" type="checkbox" id=<%=all_components[index] %> onclick='window.location.assign("/catalog/component/<%= all_components[index]%>")' 
+        <% if(all_components[index] === check_component){ %>
+             checked 
+        <% } else{ %>
+             unchecked 
+        <% } %>>
+        <label class="form-check-label" for="formCheck-1"><%=all_components[index] %></label></div>
+    <% } %>
+

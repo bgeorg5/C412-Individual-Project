@@ -1,0 +1,31 @@
+<% 
+if(catalog_entries.length != 0){
+var maxitems = catalog_entries.length;
+if(catalog_entries.length > 15){
+    maxitems = 15;
+}
+console.log(maxitems);
+console.log(catalog_entries[0].id);
+console.log(starternum);
+
+for(let element = 0; element < maxitems; element++){ 
+var cid = catalog_entries[element].id; 
+console.log(element+" "+cid); %>
+<div class="col-12 col-md-6 col-lg-4">
+    <div class="clean-product-item">
+        <div class="image">
+            <a href="/item/<%= cid %>">
+            <img class="img-fluid d-block mx-auto" style="padding-bottom: 10%; padding-top: 10%" src="<%= catalog_entries[element].images[0] %>">
+            </a>
+        </div>
+        <div class="product-name"><a href="/item/<%= catalog_entries[element].id %>"><%= catalog_entries[element].title %></a></div>
+        <div class="about" style=" position:relative; white-space: nowrap; overflow:unset;">
+            <div class="rating" style="position:relative;"><%- include('./ratings', {item: catalog_entries[element]}) %></div>
+            <div class="price">
+                <h3>$ <%= catalog_entries[element].price %></h3>
+            </div>
+        </div>
+    </div>
+</div>
+<% } 
+}%> 
